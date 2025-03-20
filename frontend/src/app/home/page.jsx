@@ -32,9 +32,6 @@ export default function HomePage () {
                     <h1 className="text-[50px]">{conversation.title} </h1>
                     <p>{conversation.completed ? "Completed" : "Ongoing"}</p>
                     <p>Date: {conversation.startDate}</p>
-                    {
-                        //make delete button trash can icon
-                    }
                     <img title={"TrashCan"} key={i} className="w-6 h-6 hover:scale-125 hover:cursor-pointer" src={"/trashcan.png"}
                         onClick={handleDelete}>
                     </img>
