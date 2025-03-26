@@ -23,11 +23,11 @@ export default function LoginPage() {
 
     return (
 <div 
-      className="relative flex flex-col items-center justify-center bg-gradient-to-r from-white via-pink-400 to-yellow-900 min-h-screen overflow-hidden">
+      className="relative flex flex-col items-center justify-center bg-gradient-to-r from-pink-500 via-pink-400 to-pink-500 min-h-screen overflow-hidden">
       <div 
-        className="w-full p-6 rounded-md shadow-md lg:max-w-xl bg-green-400 hover:bg-yellow-400 transition-colors duration-300 px-4 py-2 rounded-lg t shadow-2xl">
+        className="w-full p-6 rounded-md shadow-md lg:max-w-xl bg-gray-100 transition-colors duration-300 px-4 py-2 rounded-lg t shadow-2xl">
         <h1 
-          className="text-3xl font-bold text-center text-red-700">
+          className="text-3xl font-bold text-center text-black">
           Login
         </h1>
         <form className="mt-6"
@@ -61,20 +61,18 @@ export default function LoginPage() {
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-gray-400 focus:ring-gray-300 focus:outline-none focus:ring focus:ring-opacity-40"
             />
           </div>
-          <div className="mt-2">
-          <button 
+          <div className="mt-2 flex justify-between items-center">
+            <button 
               type="button" 
-              className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-yellow-900 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 hover:scale-105" 
+              className="w-full mt-2 px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-green-400 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 hover:scale-105" 
               title="submitButton">
               <Link href="/register" className="font-medium text-palette-500 hover:underline">
                 Create User
               </Link>
             </button>
-            </div>
-            <div className="mt-2">
             <button 
               type="submit" 
-              className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-yellow-900 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 hover:scale-105" 
+              className="w-full mt-2 px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-green-400 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 hover:scale-105" 
               title="submitButton">
               Login
             </button>
