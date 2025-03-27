@@ -2,11 +2,17 @@
 
 import React, {useState} from "react";
 import Link from "next/link"
+import {useRouter} from 'next/navigation';
 
 export default function RegisterPage() {
+  const router = useRouter();
 
 
-    const [formData, setFormData] = useState({username: "", password: "", confirmPassword: ""});
+    const [formData, setFormData] = useState({email: "", password: "", confirmPassword: ""});  
+    const [validationErrors, setValidationErrors] = useState({email: "", password: ""});
+
+    
+
 
     const handleInput = async(e) => {
         const {name, value} = e.target;
@@ -16,14 +22,25 @@ export default function RegisterPage() {
     const handleSubmit = async(e) => {
         e.preventDefault();
         console.log(formData);
-        //This is where the username and password is put in the database???
+        if(formData.email.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)) {
+            setValidationErrors({...validationErrors, email: ""})
+            if(formData.confirmPassword == formData.password) {
+              setValidationErrors({...validationErrors, password: ""});
+              router.push("/login");
+              //This is where the username and password is put in the database???
+            } else setValidationErrors({...validationErrors, password: "The passwords don't match"})
+
+        } else setValidationErrors({...validationErrors, email: "This is not an email!"})
+        if(formData.confirmPassword != formData.password) {
+          setValidationErrors({...validationErrors, password: "The passwords don't match"})
+        } else setValidationErrors({...validationErrors, password: ""})
     }
 
     return (
         <div 
         className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden">
         <div 
-          className="w-full p-6 rounded-md shadow-md lg:max-w-xl bg-white-300">
+          className="w-full p-6 rounded-md shadow-md lg:max-w-xl bg-gray-100">
           <h1 className="text-3xl font-bold text-center text-gray-700">Register</h1>
           <form 
             className="mt-6" 
@@ -31,19 +48,20 @@ export default function RegisterPage() {
               <div 
                 className="mb-4">
                   <label 
-                    htmlFor="username" 
+                    htmlFor="email" 
                     className="block text-sm font-semibold text-gray-800">
-                    Username
+                    E-mail
                   </label>
                   <input
                     type="text" 
-                    id="username" 
+                    id="email" 
                     onChange={handleInput}
-                    autoComplete="username" 
-                    name="username"
+                    autoComplete="email" 
+                    name="email"
                     data-testid="unInput"
                     className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-gray-400 focus:ring-gray-300 focus:outline-none focus:ring focus:ring-opacity-40"
                   />
+                  <p className="text-red-400">{validationErrors.email}</p>
               </div> 
             <div className="mb-2">
               <label 
@@ -75,6 +93,7 @@ export default function RegisterPage() {
                   className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-gray-400 focus:ring-gray-300 focus:outline-none focus:ring focus:ring-opacity-40"
                 />
               </div>
+              <p className="text-red-400">{validationErrors.password}</p>
             <div 
               className="mt-2">
               <button 
