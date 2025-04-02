@@ -2,6 +2,7 @@
 
 import React, {useState} from 'react';
 import {useRouter} from 'next/navigation'
+import Navbar from '../components/navBar';
 
 export default function CreateApp() {
     const router = useRouter();
@@ -24,13 +25,9 @@ export default function CreateApp() {
 
     return (
         <div>
+            <Navbar></Navbar>
             <h1 className="text-[100px] font-bold text-gray-800 text-center tracking-wide drop-shadow-lg"> NEW CONFLICT </h1>
         
-            <div className= "fixed top-5 right-5">
-                <button className="bg-yellow-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-700 transition-all"
-                onClick={ e => {//Also add so that your web token is delete
-                router.push('/login')}}> Log out</button>
-            </div> 
 
             <div className="relative flex flex-col items-center min-h-screen overflow-hidden">       
                 <div className="relative w-full p-6 rounded-md shadow-md lg:max-w-xl bg-gray-100 transition-colors duration-300 px-4 py-2 rounded-lg t shadow-2xl">
