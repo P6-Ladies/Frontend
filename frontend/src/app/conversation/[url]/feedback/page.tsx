@@ -18,7 +18,7 @@ export default function FeedbackPage() {
 
     const strategies = ["avoiding","dominating","co-operating"] //Mocked test data for strategy evolution
 
-    const assesment = "du ik særlig venlig";
+    const assesment = "moses sagde du ik særlig venlig";
 
     const pil = " --> ";
 
@@ -31,7 +31,7 @@ export default function FeedbackPage() {
             <div className="relative flex justify-center items-center">
                 <div className="my-2 flex flex-row w-5/6 justify-between">
                     
-                    <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
+                    <button className="bg-gray-800 fixed text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
                     onClick={ e => {//
                     router.push('/conversation/' + conversation.getId())}}>Conversation</button>
                     
@@ -40,7 +40,7 @@ export default function FeedbackPage() {
             <div className="relative w-full h-screen flex justify-center items-center">
 
                 
-                <div className="relative w-4/5 bg-gray-200 mx-auto my-10 rounded flex shadow-lg flex-row p-4 space-y-2 items-center">
+                <div className="relative fixed w-4/5 bg-gray-200 mx-auto my-10 rounded flex shadow-lg flex-row p-4 space-y-2 items-center">
 
                 <div className="grid grid-rows-2 grid-cols-2 gap-4 w-full h-full">
 

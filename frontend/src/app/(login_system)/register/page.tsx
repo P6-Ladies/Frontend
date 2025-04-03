@@ -3,16 +3,38 @@
 import React, {useState} from "react";
 import Link from "next/link"
 import {useRouter} from 'next/navigation';
+const path = require("path");
 
 export default function RegisterPage() {
   const router = useRouter();
 
 
-    const [formData, setFormData] = useState({email: "", password: "", confirmPassword: ""});  
+    const [formData, setFormData] = useState({email : "", password : "", confirmPassword: ""});  
     const [validationErrors, setValidationErrors] = useState({email: "", password: ""});
 
-    
+    const register = async (Email, Password) => {
 
+      console.log("Sending request:", JSON.stringify({Email,Password}));
+
+      try {
+        const response = await fetch("http://localhost/users", {
+          method: "POST",
+          headers:  {"Content-Type": "application/json"},
+          body: JSON.stringify({ Email, Password })
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.json());
+        }
+
+        const responseData = await response.json();
+        //Noget med json web tokens??? spørg maria
+        return responseData;
+
+      } catch (error){
+        console.error(error);
+      }
+    }
 
     const handleInput = async(e) => {
         const {name, value} = e.target;
@@ -26,8 +48,15 @@ export default function RegisterPage() {
             setValidationErrors({...validationErrors, email: ""})
             if(formData.confirmPassword == formData.password) {
               setValidationErrors({...validationErrors, password: ""});
-              router.push("/login");
-              //This is where the username and password is put in the database???
+              const user = await register(formData.email, formData.password);
+              console.log(user);
+              
+              if (user){
+                router.push("/login");
+              } else {
+                console.log("hjælp");
+              }
+              
             } else setValidationErrors({...validationErrors, password: "The passwords don't match"})
 
         } else setValidationErrors({...validationErrors, email: "This is not an email!"})

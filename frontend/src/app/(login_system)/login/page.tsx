@@ -8,6 +8,31 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({email: "", password: ""});
   const [validationErrors, setValidationErrors] = useState("");
 
+  const login = async (Email, Password) => {
+
+    console.log("Sending request:", JSON.stringify({Email,Password}));
+
+    try {
+      const response = await fetch("http://localhost/login", {
+        method: "POST",
+        headers:  {"Content-Type": "application/json"},
+        body: JSON.stringify({ Email, Password })
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.json());
+      }
+
+      const responseData = await response.json();
+      //Noget med json web tokens??? spørg maria
+      return responseData;
+
+    } catch (error){
+      console.error(error);
+    }
+  }
+
+
   const handleInput = async (e) => {
     const {name, value} = e.target;
         setFormData({...formData, [name] : value})
@@ -16,8 +41,10 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
-    //Check login with password from database, currently hardcoded as test, test
-    if(formData.email == "test" && formData.password == "test"){
+    //Make sure to do the JSON web token thing so the user is remembered
+
+    const user = await login(formData.email, formData.password);
+    if(user){
       router.push('/home');
     } else {
       setValidationErrors("email or password is incorrect");

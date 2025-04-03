@@ -13,7 +13,7 @@ const Navbar = () => {
 
   return (
     
-    <nav className='sticky top-0 z-50 w-full shadow-md bg-black-300 py-6 text-black'>
+    <nav className='sticky top-0 w-full shadow-md bg-black-300 py-6 text-black'>
       
       <div className='mx-auto w-full max-w-screen-2x1 px-6 xs:px-8 sm:px-16 flex justify-between items-center'>
 

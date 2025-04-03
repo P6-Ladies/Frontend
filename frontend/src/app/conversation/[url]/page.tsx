@@ -82,18 +82,18 @@ export default function ConversationPage() {
             <Navbar></Navbar>
             <div className="relative w-full h-screen flex justify-center items-center">
                 
-                <div className= "fixed top-25 left-5">
+                <div className= "fixed top-30 left-5">
                     <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
                     onClick={ e => {//
                         router.push('/conversation/'+ conversation.getId() + '/feedback')}}>STATS</button>
                 </div> 
-                <div className= "fixed bottom-5 right-5">
+                <div className= "fixed top-30 right-5">
                     <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
                     onClick={ e => {//
                     finishConversation()}}>Finish conversation</button>
                 </div> 
 
-                <div className="w-4/5 h-4/5 bg-gray-200 mx-auto my-10 rounded flex shadow-lg absolute flex-col p-4 space-y-2">
+                <div className="w-4/5 h-2/3 mb-20 fixed bg-gray-200 mx-auto my-5 rounded flex shadow-lg absolute flex-col p-4 space-y-2">
                     <div className="h-full overflow-y-scroll p-4 space-y-2 flex flex-col-reverse">
                         {messages.map((message : Message, i) => ( message.isUserSent() ? 
                         <div key={i} className="flex justify-end">
