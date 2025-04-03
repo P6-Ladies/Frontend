@@ -8,8 +8,16 @@ import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
   const router = useRouter();
-  const isLoggedIn = false;
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const deleteUserModal = (e) => {
+
+  }
+
+  const changePasswordModal = (e) => {
+
+  }
 
   return (
     
@@ -26,7 +34,7 @@ const Navbar = () => {
         
 
         <ul className='gap-x-6 max-md:hidden flex'>
-        {isLoggedIn ? (
+        
             <>
             <li 
                 className='bg-yellow-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-700 transition-all'
@@ -35,21 +43,21 @@ const Navbar = () => {
                 }>
                 Logout 
             </li>
-            </>
-        ) : (
-            <>
-            <li
-                className='bg-yellow-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-700 transition-all'
-                onClick={()=>router.push('/login')}>
-                Login
+            <li>
+                <img
+                title="Settings"
+                className="w-10 h-10 ml-2 cursor-pointer hover:scale-125 transition-transform"
+                src="/cog.png"
+                onMouseEnter={() => setSettingsOpen(true)}
+                onMouseLeave={() => setSettingsOpen(false)}
+                ></img>
+                <div className="fixed bg-white flex flex-col border border-black rounded"hidden={!settingsOpen}>
+                  <p onClick={changePasswordModal}>Change Password</p> 
+                  <p onClick={deleteUserModal}>Delete User</p>               
+                </div>
             </li>
-            <li
-                className='bg-yellow-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-yellow-700 transition-all'
-                onClick={()=>router.push('/register')}>
-                Register
-            </li>
             </>
-        )}
+        
         </ul>
 
       </div>

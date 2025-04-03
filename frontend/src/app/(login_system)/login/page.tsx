@@ -43,8 +43,9 @@ export default function LoginPage() {
     console.log(formData);
     //Make sure to do the JSON web token thing so the user is remembered
 
-    const user = await login(formData.email, formData.password);
-    if(user){
+    const token = await login(formData.email, formData.password);
+    if(token){
+      localStorage.setItem("token",token);
       router.push('/home');
     } else {
       setValidationErrors("email or password is incorrect");
