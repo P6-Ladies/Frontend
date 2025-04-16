@@ -7,12 +7,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Modal from 'react-modal';
 
-// Set the app element
-Modal.setAppElement('#navBar'); // Use the ID of your root element
 
 
-//fixed bg-white flex flex-col border border-black rounded
 const Navbar = () => {
+  useEffect(() => {
+    Modal.setAppElement('#navBar'); // Now it waits until navBar exists in the DOM
+  }, []);
+
+
+  //fixed bg-white flex flex-col border border-black rounded
   const router = useRouter();
 
   const userId = 1;

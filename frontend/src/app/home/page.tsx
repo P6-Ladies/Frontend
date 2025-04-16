@@ -1,21 +1,74 @@
 "use client"
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useRouter} from 'next/navigation'
 import Navbar from '../components/navBar'
 
 export default function HomePage () {
     const router = useRouter();
+    const userId = 1;
 
     //Conversations to be hentet from the database corresponding to username
     const [conversations,setConversations] = useState(
-        [{id: 1, title: "Test", startDate: "18/03/2025", completed: false}, 
-         {id: 2, title: "Test2", startDate: "17/03/2025", completed: true}]
+        [   ]
     );
+    const [refreshKey, setRefreshKey] = useState(0);
 
-    const handleDelete = (e) => {
+    const handleDelete = async (e) => {
         e.preventDefault();
-        //Handle deleting clicked element e
+        e.stopPropagation();
+        try {
+            console.log(e.target.title);
+            const response = await fetch("http://localhost/conversations/" + e.target.title, {
+              method: "DELETE",
+              headers:  {"Content-Type": "application/json"}
+            });
+        
+            if (!response.ok) {
+                throw new Error(await response.json());
+            }
+
+            const responseData = await response.json();
+            console.log(responseData);
+            setRefreshKey(refreshKey + 1);
+        
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    useEffect(() => {
+        fetchNOget();
+    }, [refreshKey]);
+    const fetchNOget = async () => {        
+        console.log("Trying to fetch")
+        try {
+            const response = await fetch(("http://localhost/conversations/"+ userId), {
+              method: "GET",
+              headers:  {"Content-Type": "application/json"}
+            });
+      
+            if (!response.ok) {
+              throw new Error(await response.json());
+            }
+      
+            const responseData = await response.json();
+            console.log(responseData);
+
+            //hjælp sina
+            let list = [];
+            responseData.conversations.map((data, i) => (
+
+                list.push(data)
+
+            ))
+            
+            setConversations(list);
+      
+          } catch (error){
+            console.error(error);
+          }
     }
     
     return (
@@ -35,7 +88,7 @@ export default function HomePage () {
                             <h1 className="text-[50px]">{conversation.title} </h1>
                             <p>{conversation.completed ? "Completed" : "Ongoing"}</p>
                             <p>Date: {conversation.startDate}</p>
-                            <img title={"TrashCan"} key={i} className="w-6 h-6 hover:scale-125 hover:cursor-pointer" src={"/trashcan.png"}
+                            <img title={conversation.id.toString()} key={i} className="w-6 h-6 hover:scale-125 hover:cursor-pointer" src={"/trashcan.png"}
                                 onClick={handleDelete}>
                             </img>
                         </div>
