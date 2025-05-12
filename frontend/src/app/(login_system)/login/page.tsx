@@ -24,7 +24,6 @@ export default function LoginPage() {
       }
 
       const responseData = await response.json();
-      //Noget med json web tokens??? spørg maria
       return responseData;
 
     } catch (error){
@@ -43,9 +42,13 @@ export default function LoginPage() {
     console.log(formData);
     //Make sure to do the JSON web token thing so the user is remembered
 
-    const token = await login(formData.email, formData.password);
+    const responseData = await login(formData.email, formData.password);
+    console.log(responseData);
+    const token = responseData.token;
+    const userId = responseData.userId;
     if(token){
       localStorage.setItem("token",token);
+      localStorage.setItem("userId",userId);
       router.push('/home');
     } else {
       setValidationErrors("email or password is incorrect");

@@ -1,19 +1,90 @@
 "use client"
 
-import React, {useState} from 'react';
+import jwt from "jsonwebtoken";
+import React, {useState, useEffect} from 'react';
 import {useRouter} from 'next/navigation'
 import Navbar from '../components/navBar';
 
 export default function CreateApp() {
     const router = useRouter();
+    const [token, setToken] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        const t = localStorage.getItem("token");
+        const u = localStorage.getItem("userId");
+        setToken(t);
+        setUserId(u);
+    }, []);
+
+    
+
 
 
     const [formData, setFormData] = useState({title: "", agent: 2, scenario: 1});
+    const [agents, setAgents] = useState([]);
+    const [scenarios, setScenarios] = useState([]);
 
     const handleInput = async (e) => {
         const {name, value} = e.target;
             setFormData({...formData, [name] : value})
     }
+
+    const getAgents = async () => {
+        try {
+            const response = await fetch("http://localhost/users/" + userId + "/agents", {
+                method: "GET",
+                headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.json());
+              }
+
+            const responseData = await response.json();
+
+            let list = [];
+            responseData.map((data, i) => (
+
+                list.push(data)
+
+            ))
+
+            setAgents(list);
+
+            } catch (error){
+                console.error(error);
+            }
+        }
+        getAgents();
+
+        const getScenarios = async () => {
+            try {
+                const response = await fetch("http://localhost/users/" + userId + "/scenarios", {
+                    method: "GET",
+                    headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                });
+    
+                if (!response.ok) {
+                    throw new Error(await response.json());
+                  }
+    
+                const responseData = await response.json();
+    
+                let list = [];
+                responseData.map((data, i) => (
+    
+                    list.push(data)
+    
+                ))
+    
+                setScenarios(list);
+    
+                } catch (error){
+                    console.error(error);
+                }
+            }
+            getScenarios();
 
     const handleSubmit = async (e) => {
         e.preventDefault();        
@@ -21,12 +92,12 @@ export default function CreateApp() {
         try {
             const response = await fetch("http://localhost/conversations", {
               method: "POST",
-              headers:  {"Content-Type": "application/json"},
-              body: JSON.stringify({title: formData.title, agentId: formData.agent, scenarioId: formData.scenario, userId: 1})
+              headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+              body: JSON.stringify({Title: formData.title, AgentId: formData.agent, ScenarioId: formData.scenario, UserId: userId})
             });
       
             if (!response.ok) {
-              throw new Error(await response.json());
+              throw new Error();
             }
       
             const responseData = await response.json();
@@ -69,14 +140,11 @@ export default function CreateApp() {
                             </label>
                             
                             <select name="agent" onChange={handleInput} id="agent" className="bg-white">
-                                <optgroup label="Escalating agents">
-                                <option value="2"> Christina </option>
-                                <option value="1"> Albert CAN'T SELECT </option>
-                                </optgroup>
-                                <optgroup label="Avoiding agents">
-                                <option value="3"> Bart CAN'T SELECT </option>
-                                <option value="4"> Donna CAN'T SELECT </option>
-                                </optgroup>
+                                { //map agents yay
+                                    agents.map((agent, i) => (
+                                        <option key={i} value={agent.id}> {agent.name}</option>
+                                    ))
+                                }
                             </select>
                         </div>
                         <div className="mb-4">
@@ -85,8 +153,11 @@ export default function CreateApp() {
                             </label>
                             
                             <select name="scenario" onChange={handleInput} id="scenario" className="bg-white">
-                                <option value="1"> Customer support </option>
-                                <option value="2">Job interview CAN'T SELECT </option>
+                            { //map scenarios yay
+                                    scenarios.map((scenario, i) => (
+                                        <option key={i} value={scenario.id}> {scenario.name}</option>
+                                    ))
+                                }
                             </select>
 
                             <div className= "absolute bottom-5 right-5">

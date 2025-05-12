@@ -6,7 +6,8 @@ import Navbar from '../components/navBar'
 
 export default function HomePage () {
     const router = useRouter();
-    const userId = 1;
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
 
     //Conversations to be hentet from the database corresponding to username
     const [conversations,setConversations] = useState(
@@ -21,7 +22,7 @@ export default function HomePage () {
             console.log(e.target.title);
             const response = await fetch("http://localhost/conversations/" + e.target.title, {
               method: "DELETE",
-              headers:  {"Content-Type": "application/json"}
+              headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
         
             if (!response.ok) {
@@ -44,9 +45,9 @@ export default function HomePage () {
     const fetchNOget = async () => {        
         console.log("Trying to fetch")
         try {
-            const response = await fetch(("http://localhost/conversations/"+ userId), {
+            const response = await fetch(("http://localhost/users/"+ userId + "/conversations"), {
               method: "GET",
-              headers:  {"Content-Type": "application/json"}
+              headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
       
             if (!response.ok) {
@@ -58,7 +59,7 @@ export default function HomePage () {
 
             //hjælp sina
             let list = [];
-            responseData.conversations.map((data, i) => (
+            responseData.map((data, i) => (
 
                 list.push(data)
 

@@ -2,7 +2,7 @@
 
 
 import React, {useState} from 'react';
-import {useRouter} from 'next/navigation';
+import {useRouter, usePathname} from 'next/navigation';
 import { Conversation } from '../../../classes/Conversation';
 import { Message } from '../../../classes/Message';
 import Navbar from '../../../components/navBar';
@@ -10,7 +10,7 @@ import Navbar from '../../../components/navBar';
 export default function FeedbackPage() {
     
     //TEST CONVERSATION
-    const conversation = new Conversation(3,"Conflict with Merete",0,"Christina","Customer support");
+    let conversation;
 
     const personality = [3,5,7,8,1]; //Mocked test data, should get from database as always
     
@@ -22,7 +22,34 @@ export default function FeedbackPage() {
 
     const pil = " --> ";
 
-    const router = useRouter();
+        const router = useRouter();
+        const pathname = usePathname();
+        const conversationId = pathname.split("/")[2];
+
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+
+    const fetchConversation = async () => {        
+        console.log("Trying to fetch")
+        try {
+            const response = await fetch(("http://localhost/conversations/"+ conversationId), {
+                method: "GET",
+                headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+            });
+        
+            if (!response.ok) {
+                throw new Error(await response.json());
+            }
+        
+            const responseData = await response.json();
+            console.log(responseData);
+            conversation = new Conversation(responseData.id, responseData.title, responseData.userId, responseData.agentId, responseData.scenarioId)
+        
+            } catch (error){
+            console.error(error);
+            }
+    }
+    fetchConversation
 
 
     return (

@@ -13,6 +13,9 @@ export default function ConversationPage() {
     const pathname = usePathname();
     const conversationId = pathname.split("/")[2];
 
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
     const timezone : number = new Date().getTimezoneOffset();
 
     //Add title to top of page later?
@@ -21,21 +24,29 @@ export default function ConversationPage() {
     const [messages, setMessages] = useState([]);
     const [textInput, setTextInput] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
+    const [loading, setLoading] = useState(false)
 
     function messageCompare(a,b) {
         return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime();
     }
 
     useEffect(() => {
-            fetchNOget();
+            fetchMessages();
+            fetchConversation();
         }, [refreshKey]);
-        
-    const fetchNOget = async () => {        
+
+    const onKeyDownHandler = (e) => {
+        if (e.key == 'Enter') {
+            handleSend(e);
+        }
+    }
+
+    const fetchConversation = async () => {        
         console.log("Trying to fetch")
         try {
-            const response = await fetch(("http://localhost/messages/"+ conversationId), {
+            const response = await fetch(("http://localhost/conversations/"+ conversationId), {
                 method: "GET",
-                headers:  {"Content-Type": "application/json"}
+                headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
         
             if (!response.ok) {
@@ -44,10 +55,31 @@ export default function ConversationPage() {
         
             const responseData = await response.json();
             console.log(responseData);
-
-            setTitle(responseData.title);
             setCompleted(responseData.completed);
-            setMessages(responseData.messages.sort(messageCompare));
+            setTitle(responseData.title);
+        
+            } catch (error){
+            console.error(error);
+            }
+    }
+        
+    const fetchMessages = async () => {        
+        console.log("Trying to fetch")
+        try {
+            const response = await fetch(("http://localhost/conversations/"+ conversationId + "/messages"), {
+                method: "GET",
+                headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+            });
+        
+            if (!response.ok) {
+                throw new Error(await response.json());
+            }
+        
+            const responseData = await response.json();
+            console.log(responseData);
+            setMessages(responseData.sort(messageCompare));
+            console.log(responseData[0]);
+            console.log(responseData[1]);
         
             } catch (error){
             console.error(error);
@@ -60,7 +92,8 @@ export default function ConversationPage() {
     }
 
     const handleSend = async (e) => {
-
+        
+        setLoading(true);
         if(textInput == ""){
             throw new Error("Tomt ligsom");
         } else {
@@ -68,10 +101,10 @@ export default function ConversationPage() {
             e.preventDefault();
             
             try {
-                const response = await fetch("http://localhost/messages", {
+                const response = await fetch("http://localhost/conversations/" + conversationId + "/messages", {
                   method: "POST",
-                  headers:  {"Content-Type": "application/json"},
-                  body: JSON.stringify({ConversationId: conversationId, Body: textInput})
+                  headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                  body: JSON.stringify({Message: textInput})
                 });
           
                 if (!response.ok) {
@@ -86,6 +119,7 @@ export default function ConversationPage() {
 
             setTextInput("");
             setRefreshKey(refreshKey + 1);
+            setLoading(false);
         }
         
     }
@@ -94,9 +128,9 @@ export default function ConversationPage() {
         setCompleted(true);
         
         try {
-            const response = await fetch(("http://localhost/conversations/setCompleted/" + conversationId), {
+            const response = await fetch(("http://localhost/conversations/" + conversationId + "/complete"), {
               method: "GET",
-              headers:  {"Content-Type": "application/json"}
+              headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
       
             if (!response.ok) {
@@ -131,7 +165,12 @@ export default function ConversationPage() {
 
                 <div className="w-4/5 h-2/3 mb-20 fixed bg-gray-200 mx-auto my-5 rounded flex shadow-lg absolute flex-col p-4 space-y-2">
                     <div className="h-full overflow-y-scroll p-4 space-y-2 flex flex-col-reverse">
-                        {messages.map((message, i) => ( message.userSent ? 
+                            {loading ? <img
+                                title="Loading"
+                                src="/loading.gif"
+                                className="w-1/7 h-1/5"
+                            /> : <></>}
+                        {messages.map((message, i) => ( message.sender == "User" ? 
                         <div key={i} className="flex justify-end">
                             <div className='flex-col'>
                                 <div className="bg-white p-2 rounded shadow text-sm max-w-xs">
@@ -156,6 +195,7 @@ export default function ConversationPage() {
                             type="text"
                             id="textInput"
                             onChange={handleInput}
+                            onKeyDown={onKeyDownHandler}
                             value={textInput}
                             autoComplete="wazwaza"
                             name="textInput"
