@@ -1,7 +1,7 @@
 "use client"
 
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
 import { Conversation } from '../../../classes/Conversation';
 import { Message } from '../../../classes/Message';
@@ -26,8 +26,21 @@ export default function FeedbackPage() {
         const pathname = usePathname();
         const conversationId = pathname.split("/")[2];
 
-        const userId = localStorage.getItem("userId");
-        const token = localStorage.getItem("token");
+        const [token, setToken] = useState(null);
+        const [userId, setUserId] = useState(null);
+        
+        useEffect(() => {
+                const t = localStorage.getItem("token");
+                if(t == "null") router.push('/login');
+                const u = localStorage.getItem("userId");
+                setToken(t);
+                setUserId(u);
+            }, []);
+
+        useEffect(() => {
+            if (userId == null) return;
+            fetchConversation();
+        }, [userId])
 
     const fetchConversation = async () => {        
         console.log("Trying to fetch")
@@ -38,7 +51,9 @@ export default function FeedbackPage() {
             });
         
             if (!response.ok) {
-                throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
         
             const responseData = await response.json();
@@ -49,7 +64,6 @@ export default function FeedbackPage() {
             console.error(error);
             }
     }
-    fetchConversation
 
 
     return (
@@ -60,7 +74,7 @@ export default function FeedbackPage() {
                     
                     <button className="bg-gray-800 fixed text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
                     onClick={ e => {//
-                    router.push('/conversation/' + conversation.getId())}}>Conversation</button>
+                    router.push('/conversation/' + conversationId)}}>Conversation</button>
                     
                 </div>
             </div>

@@ -12,18 +12,29 @@ export default function CreateApp() {
 
     useEffect(() => {
         const t = localStorage.getItem("token");
+        if(t == "null") router.push('/login');
         const u = localStorage.getItem("userId");
         setToken(t);
         setUserId(u);
     }, []);
 
-    
+    useEffect(() => {
+        if(userId == null || token == null) return;
+        getAgents();
+        getScenarios();
+    }, [userId, token])
 
 
 
-    const [formData, setFormData] = useState({title: "", agent: 2, scenario: 1});
     const [agents, setAgents] = useState([]);
     const [scenarios, setScenarios] = useState([]);
+    const [formData, setFormData] = useState({title: "", agent: 0, scenario: 0});
+
+    useEffect(() => {
+        if(agents.length == 0 || scenarios.length == 0) return;
+        setFormData({...formData, agent: agents[0].id, scenario: scenarios[0].id})
+    }, [agents, scenarios])
+    
 
     const handleInput = async (e) => {
         const {name, value} = e.target;
@@ -38,7 +49,10 @@ export default function CreateApp() {
             });
 
             if (!response.ok) {
-                throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
+
               }
 
             const responseData = await response.json();
@@ -56,7 +70,6 @@ export default function CreateApp() {
                 console.error(error);
             }
         }
-        getAgents();
 
         const getScenarios = async () => {
             try {
@@ -66,7 +79,10 @@ export default function CreateApp() {
                 });
     
                 if (!response.ok) {
-                    throw new Error(await response.json());
+                    const text = await response.text();
+                    console.error("Fetch error:", text);
+                    throw new Error("Failed to fetch: " + response.status);
+
                   }
     
                 const responseData = await response.json();
@@ -84,8 +100,6 @@ export default function CreateApp() {
                     console.error(error);
                 }
             }
-            getScenarios();
-
     const handleSubmit = async (e) => {
         e.preventDefault();        
         //Push a new conversation to the database, and route to its ID. Currently hardcoded

@@ -13,8 +13,16 @@ export default function ConversationPage() {
     const pathname = usePathname();
     const conversationId = pathname.split("/")[2];
 
-    const userId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
+    const [token, setToken] = useState(null);
+    const [userId, setUserId] = useState(null);
+    
+        useEffect(() => {
+            const t = localStorage.getItem("token");
+            if(t == "null") router.push('/login');
+            const u = localStorage.getItem("userId");
+            setToken(t);
+            setUserId(u);
+        }, []);
 
     const timezone : number = new Date().getTimezoneOffset();
 
@@ -25,15 +33,26 @@ export default function ConversationPage() {
     const [textInput, setTextInput] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
     const [loading, setLoading] = useState(false)
+    const [tempMessage, setTempMessage] = useState("")
+    const [loadedConversation, setLoadedConversation] = useState(false)
 
     function messageCompare(a,b) {
         return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime();
     }
 
     useEffect(() => {
+            if(userId == null) return;
             fetchMessages();
             fetchConversation();
-        }, [refreshKey]);
+        }, [userId, refreshKey]);
+
+    useEffect(() => {
+        console.log(completed)
+        if(messages.length == 0 || messages == null || loadedConversation == false) return;
+        if(new RegExp('conflict over', 'i').test(messages[0].body) && completed == false){
+            finishConversation();
+        }
+    }, [messages])
 
     const onKeyDownHandler = (e) => {
         if (e.key == 'Enter') {
@@ -42,7 +61,6 @@ export default function ConversationPage() {
     }
 
     const fetchConversation = async () => {        
-        console.log("Trying to fetch")
         try {
             const response = await fetch(("http://localhost/conversations/"+ conversationId), {
                 method: "GET",
@@ -50,13 +68,15 @@ export default function ConversationPage() {
             });
         
             if (!response.ok) {
-                throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
         
             const responseData = await response.json();
-            console.log(responseData);
             setCompleted(responseData.completed);
             setTitle(responseData.title);
+            setLoadedConversation(true);
         
             } catch (error){
             console.error(error);
@@ -64,7 +84,6 @@ export default function ConversationPage() {
     }
         
     const fetchMessages = async () => {        
-        console.log("Trying to fetch")
         try {
             const response = await fetch(("http://localhost/conversations/"+ conversationId + "/messages"), {
                 method: "GET",
@@ -72,27 +91,25 @@ export default function ConversationPage() {
             });
         
             if (!response.ok) {
-                throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
         
             const responseData = await response.json();
-            console.log(responseData);
             setMessages(responseData.sort(messageCompare));
-            console.log(responseData[0]);
-            console.log(responseData[1]);
-        
             } catch (error){
             console.error(error);
             }
     }
     
     const handleInput = async (e) => {
-        console.log(e.target.value);
         setTextInput(e.target.value);
     }
 
     const handleSend = async (e) => {
         
+        setTempMessage(textInput)
         setLoading(true);
         if(textInput == ""){
             throw new Error("Tomt ligsom");
@@ -102,13 +119,15 @@ export default function ConversationPage() {
             
             try {
                 const response = await fetch("http://localhost/conversations/" + conversationId + "/messages", {
-                  method: "POST",
-                  headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
-                  body: JSON.stringify({Message: textInput})
+                    method: "POST",
+                    headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                    body: JSON.stringify({Message: textInput})
                 });
           
                 if (!response.ok) {
-                  throw new Error(await response.json());
+                    const text = await response.text();
+                    console.error("Fetch error:", text);
+                    throw new Error("Failed to fetch: " + response.status);
                 }
           
                 const responseData = await response.json();
@@ -117,6 +136,7 @@ export default function ConversationPage() {
                 console.error(error);
               }
 
+            setTempMessage("");
             setTextInput("");
             setRefreshKey(refreshKey + 1);
             setLoading(false);
@@ -124,27 +144,26 @@ export default function ConversationPage() {
         
     }
 
-    const finishConversation = async (e) => {
-        setCompleted(true);
-        
+    const finishConversation = async () => {
         try {
             const response = await fetch(("http://localhost/conversations/" + conversationId + "/complete"), {
-              method: "GET",
+              method: "PUT",
               headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
       
             if (!response.ok) {
-              throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
       
             const responseData = await response.json();
-            console.log(responseData);
+            setCompleted(true);
+            router.push(pathname + '/feedback');
       
           } catch (error){
             console.error(error);
           }
-
-        router.push(pathname + '/feedback');
     }
 
     return (
@@ -152,15 +171,11 @@ export default function ConversationPage() {
 
             <Navbar></Navbar>
             <div className="relative w-full h-screen flex justify-center items-center">
-                
-                <div className= "fixed top-30 left-5">
-                    <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
-                    onClick={ e => {//
-                        router.push(URL + '/feedback')}}>STATS</button>
-                </div> 
                 <div className= "fixed top-30 right-5">
                     <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
-                    onClick={finishConversation}>Finish conversation</button>
+                    onClick={finishConversation} hidden={completed}>Finish conversation</button>
+                    <button className="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-black-700 transition-all"
+                    onClick={finishConversation} hidden={!completed}>Stats</button>
                 </div> 
 
                 <div className="w-4/5 h-2/3 mb-20 fixed bg-gray-200 mx-auto my-5 rounded flex shadow-lg absolute flex-col p-4 space-y-2">
@@ -170,6 +185,17 @@ export default function ConversationPage() {
                                 src="/loading.gif"
                                 className="w-1/7 h-1/5"
                             /> : <></>}
+                            {tempMessage != "" ?
+                        <div className="flex justify-end">
+                            <div className='flex-col'>
+                                <div className="bg-white p-2 rounded shadow text-sm max-w-xs">
+                                    <p className="text-gray-300">{tempMessage}</p>
+                                </div>
+                            </div>
+                        </div>
+                            : 
+                        <></>
+                            }
                         {messages.map((message, i) => ( message.sender == "User" ? 
                         <div key={i} className="flex justify-end">
                             <div className='flex-col'>

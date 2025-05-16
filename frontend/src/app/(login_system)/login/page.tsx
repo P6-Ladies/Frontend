@@ -20,7 +20,8 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await response.json());
+        setValidationErrors("email or password is incorrect");
+        setFormData({email: "", password: ""});
       }
 
       const responseData = await response.json();
@@ -46,14 +47,10 @@ export default function LoginPage() {
     console.log(responseData);
     const token = responseData.token;
     const userId = responseData.userId;
-    if(token){
-      localStorage.setItem("token",token);
-      localStorage.setItem("userId",userId);
-      router.push('/home');
-    } else {
-      setValidationErrors("email or password is incorrect");
-      setFormData({email: "", password: ""});
-    }
+    if(!token) throw new Error("No token??");
+    localStorage.setItem("token",token);
+    localStorage.setItem("userId",userId);
+    router.push('/home');
   }
 
     return (

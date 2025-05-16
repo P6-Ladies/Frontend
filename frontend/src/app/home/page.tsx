@@ -6,9 +6,16 @@ import Navbar from '../components/navBar'
 
 export default function HomePage () {
     const router = useRouter();
-    const userId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-
+    const [token, setToken] = useState(null);
+    const [userId, setUserId] = useState(null);
+    
+        useEffect(() => {
+            const t = localStorage.getItem("token");
+            if (t == "null") router.push('/login');
+            const u = localStorage.getItem("userId");
+            setToken(t);
+            setUserId(u);
+        }, []);
     //Conversations to be hentet from the database corresponding to username
     const [conversations,setConversations] = useState(
         [   ]
@@ -26,7 +33,9 @@ export default function HomePage () {
             });
         
             if (!response.ok) {
-                throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
 
             const responseData = await response.json();
@@ -41,17 +50,20 @@ export default function HomePage () {
 
     useEffect(() => {
         fetchNOget();
-    }, [refreshKey]);
+    }, [userId, refreshKey]);
     const fetchNOget = async () => {        
+        if (userId == null) return;
         console.log("Trying to fetch")
         try {
-            const response = await fetch(("http://localhost/users/"+ userId + "/conversations"), {
+            const response = await fetch(("http://localhost/conversations/user/"+ userId), {
               method: "GET",
               headers:  {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             });
       
             if (!response.ok) {
-              throw new Error(await response.json());
+                const text = await response.text();
+                console.error("Fetch error:", text);
+                throw new Error("Failed to fetch: " + response.status);
             }
       
             const responseData = await response.json();
@@ -59,7 +71,7 @@ export default function HomePage () {
 
             //hjælp sina
             let list = [];
-            responseData.map((data, i) => (
+            responseData.conversations.map((data, i) => (
 
                 list.push(data)
 
@@ -88,7 +100,7 @@ export default function HomePage () {
                         <div key={i} onClick={ e => {router.push('/conversation/' + conversation.id)}} className="mt-5 mx-4 bg-white flex border-gray-700 justify-between items-center hover:scale-101 w-full mx-auto shadow-xl border rounded-md border-4 flex border-grey-600 bg-grey-400 p-8 bg-grey-400">
                             <h1 className="text-[50px]">{conversation.title} </h1>
                             <p>{conversation.completed ? "Completed" : "Ongoing"}</p>
-                            <p>Date: {conversation.startDate}</p>
+                            <p>Date: {new Date(conversation.createdAt).toUTCString()}</p>
                             <img title={conversation.id.toString()} key={i} className="w-6 h-6 hover:scale-125 hover:cursor-pointer" src={"/trashcan.png"}
                                 onClick={handleDelete}>
                             </img>

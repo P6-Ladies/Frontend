@@ -24,7 +24,9 @@ export default function RegisterPage() {
         });
 
         if (!response.ok) {
-          throw new Error(await response.json());
+          const text = await response.text();
+          console.error("Fetch error:", text);
+          throw new Error("Failed to fetch: " + response.status);
         }
 
         const responseData = await response.json();
